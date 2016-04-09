@@ -1,0 +1,8 @@
+name: Quidditch
+version: 1.0
+main: me.violantic.quidditch.Quidditch
+description: Yes, it is what you think it is.
+
+commands:
+     quidditch:
+          description: Default command for minigame.

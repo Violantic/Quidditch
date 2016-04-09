@@ -1,0 +1,21 @@
+pitch:
+     center:
+          x: -30
+          y: 66
+          z: -57
+     quaffle:
+          x: -30
+          y: 66
+          z: -57
+     snitch:
+          x: -30
+          y: 66
+          z: -54
+     first:
+          x: -13
+          y: 66
+          z: -58
+     second:
+          x: -46
+          y: 66
+          z: -57
