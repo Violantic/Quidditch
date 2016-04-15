@@ -2,6 +2,7 @@ package me.violantic.quidditch.game;
 
 import me.violantic.quidditch.game.team.Team;
 import org.bukkit.Location;
+import org.bukkit.Material;
 
 import java.util.List;
 
@@ -25,6 +26,8 @@ public interface Game {
     Location getBeater();
 
     Location getSnitch();
+
+    Material getNet();
 
     List<Location> getHomeNets();
 

@@ -4,10 +4,14 @@ import me.violantic.quidditch.Quidditch;
 import me.violantic.quidditch.game.Game;
 import me.violantic.quidditch.game.ball.Ball;
 import me.violantic.quidditch.game.ball.Quaffle;
+import me.violantic.quidditch.game.broom.BroomStick;
 import me.violantic.quidditch.game.scoreboard.SimpleScoreboard;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +35,7 @@ public class TeamGame implements Game {
         this.two = two;
         this.scores = new HashMap<String, Integer>();
         this.scoreboard = new SimpleScoreboard("quidditch");
-        this.scoreboard.setTitle(Quidditch.getInstance().getPrefix());
+        this.scoreboard.setTitle(Quidditch.getInstance().getPrefix().replace(":", ""));
         this.scoreboard.add(one.getName(), 0);
         this.scoreboard.add(two.getName(), 0);
     }
@@ -45,6 +49,9 @@ public class TeamGame implements Game {
             for(UUID uuid : getFirst().getPlayers()) {
                 Player player = Bukkit.getPlayer(uuid);
                 player.teleport(getFirstSpawn());
+                this.scoreboard.send(player);
+                Quidditch.getInstance().getBrooms().broomMap.put(uuid, new BroomStick(player));
+                Quidditch.getInstance().getBrooms().activate(uuid);
 
                 // Select a seeker. //
 
@@ -54,11 +61,22 @@ public class TeamGame implements Game {
             for(UUID uuid : getSecond().getPlayers()) {
                 Player player = Bukkit.getPlayer(uuid);
                 player.teleport(getSecondSpawn());
+                this.scoreboard.send(player);
+                Quidditch.getInstance().getBrooms().broomMap.put(uuid, new BroomStick(player));
+                Quidditch.getInstance().getBrooms().activate(uuid);
 
                 // Select a seeker. //
 
                 // Give them equipment. //
             }
+
+            send("BroomSticks will be enabled in 10 seconds.", true);
+            new BukkitRunnable() {
+                public void run() {
+                    Quidditch.getInstance().getBrooms().setIsAllowed(true);
+                    send("BroomSticks have been enabled! Fly!", true);
+                }
+            }.runTaskLater(Quidditch.getInstance(), 20*5);
 
             spawnBalls();
 
@@ -74,7 +92,40 @@ public class TeamGame implements Game {
     }
 
     public void score(String team) {
-        this.scores.put(team, scores.get(team) + 1);
+        scores.put(team, scores.get(team) + 1);
+        scoreboard.add(team, scores.get(team));
+        scoreboard.update();
+
+        if(scores.get(team) == 20) {
+            send(team + " has earned 200 points!", true);
+        }
+
+        send(team + " has scored 10 points! Their total is: " + ChatColor.GREEN + scores.get(team), true);
+    }
+
+    public void win(String team) {
+        // Team has caught the snitch. //
+        scores.put(team, scores.get(team) + 15);
+        scoreboard.add(team, scores.get(team));
+        scoreboard.update();
+
+        send(team + " has won the match! Their total is: " + ChatColor.GREEN + scores.get(team), true);
+    }
+
+    public void send(String message, boolean prefix) {
+        if(prefix) {
+            for(UUID uuid : getFirst().getPlayers()) {
+                Player player = Bukkit.getPlayer(uuid);
+                if(player != null)
+                    player.sendMessage(Quidditch.getInstance().getPrefix() + message);
+            }
+
+            for(UUID uuid : getSecond().getPlayers()) {
+                Player player = Bukkit.getPlayer(uuid);
+                if(player != null)
+                    player.sendMessage(Quidditch.getInstance().getPrefix() + message);
+            }
+        }
     }
 
     public Team getFirst() {
@@ -108,6 +159,11 @@ public class TeamGame implements Game {
 
     public Location getSnitch() {
         return Quidditch.getInstance().getSnitch();
+    }
+
+    @Override
+    public Material getNet() {
+        return Material.WEB;
     }
 
     public List<Location> getHomeNets() {

@@ -36,7 +36,7 @@ public class SimpleScoreboard {
         this.scores = new ConcurrentHashMap<String, Integer>();
         this.teams = Collections.synchronizedList(Lists.newArrayList());
         this.removed = Lists.newArrayList();
-        this.updated = Collections.synchronizedSet(new HashSet<>());
+        this.updated = Collections.synchronizedSet(new HashSet<String>());
     }
 
     public void add(String text, Integer score) {
@@ -144,7 +144,7 @@ public class SimpleScoreboard {
             obj.setDisplaySlot(DisplaySlot.SIDEBAR);
         }
 
-        removed.stream().forEach((remove) -> {
+        for(Integer remove : removed) {
             for (String s : scoreboard.getEntries()) {
                 Score score = obj.getScore(s);
 
@@ -156,7 +156,7 @@ public class SimpleScoreboard {
 
                 scoreboard.resetScores(s);
             }
-        });
+        };
 
         removed.clear();
 

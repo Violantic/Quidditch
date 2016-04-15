@@ -4,8 +4,10 @@ import me.violantic.quidditch.game.QuidditchCommand;
 import me.violantic.quidditch.game.ball.Ball;
 import me.violantic.quidditch.game.ball.Quaffle;
 import me.violantic.quidditch.game.ball.Snitch;
+import me.violantic.quidditch.game.broom.BroomStickHandler;
 import me.violantic.quidditch.game.team.Team;
 import me.violantic.quidditch.game.team.TeamGame;
+import me.violantic.quidditch.game.util.NetUtil;
 import me.violantic.quidditch.listener.GameListener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -31,6 +33,8 @@ public class Quidditch extends JavaPlugin {
     private Map<String, Location> balls;
 
     public TeamGame game;
+    public NetUtil netUtil;
+    public BroomStickHandler broomHandler;
 
     @Override
     public void onEnable() {
@@ -56,6 +60,9 @@ public class Quidditch extends JavaPlugin {
                 }
             }
         };
+
+        netUtil = new NetUtil();
+        broomHandler = new BroomStickHandler();
 
         game = new TeamGame(new Team("Gryffindor", ChatColor.RED), new Team("Slytherin", ChatColor.GREEN));
         game.start = false;
@@ -147,6 +154,14 @@ public class Quidditch extends JavaPlugin {
 
     public static Quidditch getInstance() {
         return instance;
+    }
+
+    public NetUtil getNets() {
+        return netUtil;
+    }
+
+    public BroomStickHandler getBrooms() {
+        return this.broomHandler;
     }
 
     public String getPrefix() {

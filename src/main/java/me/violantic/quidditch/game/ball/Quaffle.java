@@ -4,7 +4,6 @@ import me.violantic.quidditch.Quidditch;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -17,8 +16,12 @@ import org.bukkit.scheduler.BukkitRunnable;
  */
 public class Quaffle extends Ball {
 
+    public Entity entity;
+    public Player player;
+
     public Quaffle() {
         super("Quaffle", Material.WOOD);
+        entity = Quidditch.getInstance().getQuaffle().getWorld().spawnEntity(Quidditch.getInstance().getQuaffle(), EntityType.ARMOR_STAND);
     }
 
     public String getName() {
@@ -29,10 +32,23 @@ public class Quaffle extends Ball {
         return Material.WOOD;
     }
 
+    public Entity getEntity() {
+        return this.entity;
+    }
+
+    public Player getHolder() {
+        return this.player;
+    }
+
+    // Call before calling Quaffle::getHolder() //
+    public void setHolder(Player player) {
+        this.player = player;
+    }
+
     @Override
     public void spawn(final Location location) {
         // Quaffle is invisible armor stand w/ block on head :) //
-        final ArmorStand stand = (ArmorStand) location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
+        final ArmorStand stand = (ArmorStand) getEntity();
         stand.setVisible(false);
         stand.setHelmet(new ItemStack(getMater(), 1));
 
@@ -41,32 +57,27 @@ public class Quaffle extends Ball {
             public void run() {
 
                 // Check entities nearby, to see if one is a player. //
-                for(Entity entity : stand.getNearbyEntities(3, 3, 3)) {
-                    if(entity instanceof Player) {
-                        Player player = (Player) entity;
-                        double distance = player.getLocation().distanceSquared(stand.getLocation());
-                        if(distance <= 0.3) {
-                            player.setPassenger(stand);
-                            Bukkit.broadcastMessage(Quidditch.getInstance().getPrefix() + player.getName() + " has picked up the Quaffle!");
-                        }
+                stand.getNearbyEntities(3, 3, 3).stream().filter(entity -> entity instanceof Player).forEach(entity -> {
+                    Player player = (Player) entity;
+                    double distance = player.getLocation().distanceSquared(stand.getLocation());
+                    if (distance <= 1) {
+                        player.setPassenger(stand);
+                        setHolder(player);
+                        Bukkit.broadcastMessage(Quidditch.getInstance().getPrefix() + player.getName() + " has picked up the Quaffle!");
                     }
-                }
+                });
 
                 // Check blocks around it if they are "net" blocks. //
                 Location quadCenter = stand.getLocation();
-                int size = 2;
-
-                for(int x = quadCenter.getBlockX() - size; x < quadCenter.getX() + size; x++) {
-                    for (int y = quadCenter.getBlockY() - size; y < quadCenter.getY() + size; y++) {
-                        for (int z = quadCenter.getBlockZ() - size; z < quadCenter.getZ() + size; z++) {
-                            Block block = location.getWorld().getBlockAt(x, y, z);
-                            // TODO - Check if the blocks around it are a net, and if so who's net is it?
-                            // TODO - Set the score and respawn the quaffle, but not the Golden Snitch.
+                        String team = Quidditch.getInstance().getNets().get(getHolder(), quadCenter);
+                        switch (team) {
+                            case "home":
+                                Quidditch.getInstance().getGameInstance().score(Quidditch.getInstance().getGameInstance().getFirst().getName());
+                                break;
+                            case "away":
+                                Quidditch.getInstance().getGameInstance().score(Quidditch.getInstance().getGameInstance().getSecond().getName());
+                                break;
                         }
-                    }
-                }
-
-
             }
         }.runTaskTimer(Quidditch.getInstance(), 1, 1);
     }

@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
@@ -40,11 +41,11 @@ public class GameListener implements Listener {
                         if (Quidditch.getInstance().getGameInstance().getFirst().getPlayers().size() < 4) {
                             Team team = Quidditch.getInstance().getGameInstance().getSecond();
                             team.getPlayers().add(event.getPlayer().getUniqueId());
-                            Bukkit.broadcastMessage(Quidditch.getInstance().getPrefix() + event.getPlayer().getName() + " has joined " + team.getColor() + team.getName() + ChatColor.RESET + " (" + team.getPlayers().size() + "/4)");
+                            Bukkit.broadcastMessage(Quidditch.getInstance().getPrefix() + event.getPlayer().getName() + " has joined " + team.getColor() + "" + team.getName() + ChatColor.RESET + " (" + team.getPlayers().size() + "/4)");
                         } else if (Quidditch.getInstance().getGameInstance().getFirst().getPlayers().size() >= 4 && Quidditch.getInstance().getGameInstance().getSecond().getPlayers().size() < 4) {
                             Team team = Quidditch.getInstance().getGameInstance().getSecond();
                             team.getPlayers().add(event.getPlayer().getUniqueId());
-                            Bukkit.broadcastMessage(Quidditch.getInstance().getPrefix() + event.getPlayer().getName() + " has joined " + team.getColor() + team.getName() + ChatColor.RESET + " (" + team.getPlayers().size() + "/4)");
+                            Bukkit.broadcastMessage(Quidditch.getInstance().getPrefix() + event.getPlayer().getName() + " has joined " + team.getColor() + "" + team.getName() + ChatColor.RESET + " (" + team.getPlayers().size() + "/4)");
                         } else {
                             event.getPlayer().sendMessage(Quidditch.getInstance().getPrefix() + "Both teams were full.");
                         }
@@ -53,11 +54,11 @@ public class GameListener implements Listener {
                         if (Quidditch.getInstance().getGameInstance().getSecond().getPlayers().size() < 4) {
                             Team team = Quidditch.getInstance().getGameInstance().getFirst();
                             team.getPlayers().add(event.getPlayer().getUniqueId());
-                            Bukkit.broadcastMessage(Quidditch.getInstance().getPrefix() + event.getPlayer().getName() + " has joined " + team.getColor() + team.getName() + ChatColor.RESET + " (" + team.getPlayers().size() + "/4)");
+                            Bukkit.broadcastMessage(Quidditch.getInstance().getPrefix() + event.getPlayer().getName() + " has joined " + team.getColor() + "" + team.getName() + ChatColor.RESET + " (" + team.getPlayers().size() + "/4)");
                         } else if (Quidditch.getInstance().getGameInstance().getSecond().getPlayers().size() >= 4 && Quidditch.getInstance().getGameInstance().getFirst().getPlayers().size() < 4) {
                             Team team = Quidditch.getInstance().getGameInstance().getFirst();
                             team.getPlayers().add(event.getPlayer().getUniqueId());
-                            Bukkit.broadcastMessage(Quidditch.getInstance().getPrefix() + event.getPlayer().getName() + " has joined " + team.getColor() + team.getName() + ChatColor.RESET + " (" + team.getPlayers().size() + "/4)");
+                            Bukkit.broadcastMessage(Quidditch.getInstance().getPrefix() + event.getPlayer().getName() + " has joined " + team.getColor() + "" + team.getName() + ChatColor.RESET + " (" + team.getPlayers().size() + "/4)");
                         } else {
                             event.getPlayer().sendMessage(Quidditch.getInstance().getPrefix() + "Both teams were full.");
                         }
@@ -65,6 +66,17 @@ public class GameListener implements Listener {
                 }
             }
         }.runTaskLater(Quidditch.getInstance(), 20);
+    }
+
+    @EventHandler
+    public void onBoost(PlayerToggleSneakEvent event) {
+        if(event.getPlayer().isSneaking()) {
+            if(Quidditch.getInstance().getBrooms().broomMap.containsKey(event.getPlayer().getUniqueId())) {
+                // Cancel them from getting off their broom. //
+                event.setCancelled(true);
+                Quidditch.getInstance().getBrooms().toggle(event.getPlayer().getUniqueId());
+            }
+        }
     }
 
 
