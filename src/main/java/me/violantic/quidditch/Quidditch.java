@@ -30,6 +30,7 @@ public class Quidditch extends JavaPlugin {
 
     public static Quidditch instance;
 
+    private List<Ball> ballList;
     private Map<String, Location> balls;
 
     public TeamGame game;
@@ -46,6 +47,13 @@ public class Quidditch extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GameListener(), this);
         getCommand("quidditch").setExecutor(new QuidditchCommand());
 
+        ballList = new ArrayList<Ball>() {
+            {
+                this.add(new Quaffle());
+                this.add(new Snitch());
+            }
+        };
+        
         balls = new HashMap<String, Location>(){
             {
                 for(String key : getConfig().getConfigurationSection("pitch").getKeys(false)) {
@@ -82,7 +90,6 @@ public class Quidditch extends JavaPlugin {
 
                 second--;
 
-                // Broadcast in intervals of 5 seconds. //
                 if (second % 15 == 0) {
                     getServer().broadcastMessage(getPrefix() + "Starting in: " + ChatColor.GREEN + (second));
                 }
@@ -112,12 +119,7 @@ public class Quidditch extends JavaPlugin {
     }
 
     public List<Ball> getBalls() {
-        return new ArrayList<Ball>() {
-            {
-                this.add(new Quaffle());
-                this.add(new Snitch());
-            }
-        };
+        return ballList;
     }
 
     public Map<String, Location> getLocations() {
